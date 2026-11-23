@@ -117,10 +117,10 @@
 .bank-membership small{display:block;font-weight:400;font-size:.7rem;color:#896349;margin-top:4px}
 .bank-logo{width:100%;height:127px;display:flex;align-items:center;justify-content:center;margin:6px auto 2px}
 .bank-logo img{width:min(100%,200px);height:120px;object-fit:contain;filter:drop-shadow(0 5px 6px rgba(74,35,16,.10))}
-.bank-cups{display:flex;direction:rtl;gap:7px;align-items:center;justify-content:space-between;position:relative;z-index:1;padding:11px 1px 7px;border-top:1px solid rgba(133,89,48,.15);margin-top:10px}
-.loyalty-cup{display:flex;align-items:center;justify-content:center;color:#d3b58f;flex:1;min-width:0;filter:drop-shadow(0 2px 1px rgba(140,90,50,.08));transition:color .25s,transform .25s}
-.loyalty-cup.stamped{color:#754229;transform:translateY(-3px)}
-.loyalty-cup svg{display:block;width:100%;height:48px;max-width:36px}
+.bank-dallahs{display:flex;direction:rtl;gap:7px;align-items:center;justify-content:space-between;position:relative;z-index:1;padding:11px 1px 7px;border-top:1px solid rgba(133,89,48,.15);margin-top:10px}
+.loyalty-dallah{display:flex;align-items:center;justify-content:center;color:#c7aa88;--dallah-detail:#f9eddb;opacity:.72;flex:1;min-width:0;filter:drop-shadow(0 2px 1px rgba(140,90,50,.08));transition:color .25s,transform .25s}
+.loyalty-dallah.stamped{color:#754229;--dallah-detail:#e5c59b;opacity:1;transform:translateY(-3px)}
+.loyalty-dallah svg{display:block;width:100%;height:52px;max-width:42px}
 .bank-reward{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 3px 14px;border-bottom:1px solid rgba(145,99,53,.20);color:#653c22}
 .bank-reward>div{min-width:0}
 .bank-reward small{display:block;font-size:.68rem;opacity:.75;margin-bottom:4px}
@@ -134,4 +134,4 @@
 .bank-customer .install-focus p{font-size:.76rem}
 .bank-customer .notify-simple{margin-top:12px}
 .bank-customer .simple-footer{margin-top:14px}
-@media(max-width:370px){.bank-loyalty-card{padding:20px 17px 17px;min-height:530px}.bank-logo{height:107px}.bank-logo img{height:104px}.loyalty-cup svg{height:40px}.bank-qr{width:112px;height:112px}}
+@media(max-width:370px){.bank-loyalty-card{padding:20px 17px 17px;min-height:530px}.bank-logo{height:107px}.bank-logo img{height:104px}.loyalty-dallah svg{height:45px}.bank-qr{width:112px;height:112px}}

@@ -27,11 +27,12 @@ function customerCard(c){
  const ready=Number(c.available_rewards)>0;
  const cardLink=`${location.origin}/card#card=${state.cardToken}`;
  let qr='';try{qr=membershipQrSvg(cardLink);}catch(err){console.warn('QR is unavailable',err);}
- const cups=Array.from({length:Math.min(threshold,12)},(_,i)=>`<span class="loyalty-cup ${i<prog.progress?'stamped':''}" aria-label="المناسبة ${i+1} ${i<prog.progress?'مكتملة':'بانتظار الاعتماد'}"><svg viewBox="0 0 32 40" aria-hidden="true"><path d="M5 4h22l-3 31H8z" fill="currentColor"/><path d="M3 3h26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>`).join('');
+ // Crisp, scalable traditional Arabic dallah silhouette: six filled/empty stamps on the customer card.
+ const dallahs=Array.from({length:Math.min(threshold,12)},(_,i)=>`<span class="loyalty-dallah ${i<prog.progress?'stamped':''}" aria-label="المناسبة ${i+1} ${i<prog.progress?'مكتملة':'بانتظار الاعتماد'}"><svg viewBox="0 0 64 64" role="img" aria-hidden="true" focusable="false"><path d="M31 6a3 3 0 1 1 6 0a3 3 0 0 1-6 0ZM31 10h6l-1.1 12h-3.8L31 10Z" fill="currentColor"/><path d="M24 24c3-4 17-4 20 0v3H24v-3Z" fill="currentColor"/><path d="M25 27h18c0 6 5 11 5 20c0 10-8 14-14 14s-15-4-15-14c0-9 6-14 6-20Z" fill="currentColor"/><path d="M24 36C13 34 9 28 10 17l-4-3C2 27 7 40 21 45" fill="currentColor"/><path d="M43 32c9-4 17 2 17 10c0 8-5 12-12 13" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M27 56h14" stroke="var(--dallah-detail, #efdab9)" stroke-width="2" stroke-linecap="round"/></svg></span>`).join('');
  return `<article class="bank-loyalty-card" aria-label="بطاقة ضيافة القهوة الملكية">
    <div class="bank-card-top"><span class="bank-card-type">بطاقة الولاء <small>ROYAL COFFEE</small></span><span class="bank-membership">${num(prog.progress)} من ${num(threshold)}<small>مناسبات</small></span></div>
    <div class="bank-logo"><img src="/assets/logo-mark.png" alt="شعار القهوة الملكية"></div>
-   <div class="bank-cups">${cups}</div>
+   <div class="bank-dallahs">${dallahs}</div>
    <div class="bank-reward ${ready?'claimed':''}"><div><small>${ready?'🎁 المكافأة':'الهدية القادمة'}</small><strong>${ready?'هديتك جاهزة!':escapeHtml(c.reward_description)}</strong></div><div><small>${ready?'جاهزة للاستلام':'المتبقي'}</small><strong>${ready?'مبروك':`${num(prog.remaining)} مناسبات`}</strong></div></div>
    <div class="bank-qr">${qr||'<span>رمز البطاقة</span>'}</div>
    <div class="bank-bottom"><span>${escapeHtml(c.name)}</span><small class="mono">${escapeHtml(c.member_code)}</small></div>
