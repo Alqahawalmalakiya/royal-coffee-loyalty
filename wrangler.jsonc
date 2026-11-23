@@ -1,6 +1,5 @@
-
 {
-  "name": "EXISTING-WORKER-NAME",
+  "name": "hospitality-loyalty-card",
   "compatibility_date": "2026-11-23",
   "assets": {
     "directory": "./public",
