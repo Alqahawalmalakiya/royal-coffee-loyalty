@@ -1,0 +1,14 @@
+name = "royal-coffee-loyalty-push"
+main = "index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+SUPABASE_URL = "https://qkretlvladsfnecnqyca.supabase.co"
+# Configure a valid email of the business administrator.
+VAPID_SUBJECT = "mailto:admin@example.com"
+# Set using: npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+#            npx wrangler secret put VAPID_PRIVATE_JWK

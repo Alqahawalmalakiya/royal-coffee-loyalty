@@ -1,0 +1,16 @@
+/
+  Cache-Control: no-store
+/index.html
+  Cache-Control: no-store
+/card*
+  Cache-Control: no-store
+/app.js
+  Cache-Control: no-store
+/api.js
+  Cache-Control: no-store
+/styles.css
+  Cache-Control: no-store
+/service-worker.js
+  Cache-Control: no-store
+/config.js
+  Cache-Control: no-store
