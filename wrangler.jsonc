@@ -1,0 +1,9 @@
+
+{
+  "name": "EXISTING-WORKER-NAME",
+  "compatibility_date": "2026-11-23",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
+  }
+}
