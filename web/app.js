@@ -1,6 +1,6 @@
 import {config,configured,currentSession,currentCardToken,saveCardToken,loginAdmin,logout,rpc,fetchCard,cardApi,subscribeCardPush,optOutCardPush,isStandalone} from './api.js';
 import {membershipQrSvg} from './qr.js';
-import {whatsappShareUrl} from './whatsapp.js';
+import {whatsappShareUrl,cardWelcomeMessage} from './whatsapp.js';
 const root=document.querySelector('#app'),toastNode=document.querySelector('#toast');
 const state={screen:'admin-login',role:null,data:null,card:null,cardToken:'',busy:false,adminTab:'customers',search:'',currentCustomer:null,installPrompt:null,previous:'admin-login'};
 const escapeHtml=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -27,8 +27,19 @@ function customerCard(c){
  const ready=Number(c.available_rewards)>0;
  const cardLink=`${location.origin}/card#card=${state.cardToken}`;
  let qr='';try{qr=membershipQrSvg(cardLink);}catch(err){console.warn('QR is unavailable',err);}
- // Crisp, scalable traditional Arabic dallah silhouette: six filled/empty stamps on the customer card.
- const dallahs=Array.from({length:Math.min(threshold,12)},(_,i)=>`<span class="loyalty-dallah ${i<prog.progress?'stamped':''}" aria-label="المناسبة ${i+1} ${i<prog.progress?'مكتملة':'بانتظار الاعتماد'}"><svg viewBox="0 0 64 64" role="img" aria-hidden="true" focusable="false"><path d="M31 6a3 3 0 1 1 6 0a3 3 0 0 1-6 0ZM31 10h6l-1.1 12h-3.8L31 10Z" fill="currentColor"/><path d="M24 24c3-4 17-4 20 0v3H24v-3Z" fill="currentColor"/><path d="M25 27h18c0 6 5 11 5 20c0 10-8 14-14 14s-15-4-15-14c0-9 6-14 6-20Z" fill="currentColor"/><path d="M24 36C13 34 9 28 10 17l-4-3C2 27 7 40 21 45" fill="currentColor"/><path d="M43 32c9-4 17 2 17 10c0 8-5 12-12 13" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M27 56h14" stroke="var(--dallah-detail, #efdab9)" stroke-width="2" stroke-linecap="round"/></svg></span>`).join('');
+ // Original silhouette shaped after an actual traditional Arabian dallah: finial, domed lid, left handle, long upturned right spout.
+ const dallahSvg=`<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" class="dallah-icon">
+  <path d="M42 54C32 43 18 43 14 54C10 66 20 83 39 89" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M67 58C75 42 88 32 106 34C91 38 87 45 82 55C78 62 75 67 73 73L67 58Z" fill="currentColor"/>
+  <path d="M44 48H68C68 57 71 62 75 71C80 83 76 94 66 97C58 100 45 99 39 95C30 90 30 80 35 70C39 62 44 57 44 48Z" fill="currentColor"/>
+  <path d="M55 4C52 9 51 13 54 17L53 20H58L57 17C61 13 59 9 55 4Z" fill="currentColor"/>
+  <path d="M53 20H58L59 28H52L53 20Z" fill="currentColor"/>
+  <path d="M52 27C51 33 46 37 42 40C39 43 38 46 38 49H74C74 45 72 42 68 39C62 35 60 32 59 27H52Z" fill="currentColor"/>
+  <path d="M37 49H75V52H37Z" fill="currentColor"/>
+  <path d="M39 48C35 43 34 40 33 36" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M42 58C48 56 61 56 68 58M40 85C47 91 62 92 69 86" fill="none" stroke="var(--dallah-detail, #f4dec1)" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>
+</svg>`;
+ const dallahs=Array.from({length:Math.min(threshold,12)},(_,i)=>`<span class="loyalty-dallah ${i<prog.progress?'stamped':''}" role="img" aria-label="المناسبة ${i+1} ${i<prog.progress?'مكتملة':'بانتظار الاعتماد'}">${dallahSvg}</span>`).join('');
  return `<article class="bank-loyalty-card" aria-label="بطاقة ضيافة القهوة الملكية">
    <div class="bank-card-top"><span class="bank-card-type">بطاقة الولاء <small>ROYAL COFFEE</small></span><span class="bank-membership">${num(prog.progress)} من ${num(threshold)}<small>مناسبات</small></span></div>
    <div class="bank-logo"><img src="/assets/logo-mark.png" alt="شعار القهوة الملكية"></div>
@@ -68,7 +79,7 @@ function notificationsPrompt(c){
  return `<section class="notify-simple" aria-label="تفعيل تذكيرات الحجوزات"><div class="notify-simple-head">🔔 <strong>خلّنا نذكّرك بجمعتك</strong></div><p>توصلك رسالة من القهوة الملكية تذكرك بحجز ضيافة مناسباتك. مرة واحدة في الأسبوع حسب اليوم والوقت الذي تحدده إدارة القهوة الملكية.</p><small>بالضغط على «أوافق وأفعّل التذكيرات» أنت توافق على استقبال رسائل ترويجية للحجز وحفظ اشتراك الجهاز. <a href="#privacy" data-action="privacy">سياسة الخصوصية</a>.</small><div class="notify-actions"><button class="btn gold wide" data-action="enable-push">أوافق وأفعّل التذكيرات</button><button class="btn ghost small" data-action="disable-push">إيقاف التذكيرات</button></div></section>`;
 }
 function cardView(){
- if(!state.card){root.innerHTML=`<div class="app-shell"><main class="customer-layout"><section class="panel"><h1>بطاقتك في ضيافة القهوة الملكية</h1><p>افتح الرابط الخاص الذي أرسلته لك الإدارة.</p><form id="open-link-form"><div class="field"><label>رابط بطاقتك</label><input name="link" type="text" required placeholder="الصق رابط البطاقة"></div><button type="submit" class="btn wide">فتح البطاقة</button></form></section></main></div>`;return;}
+ if(!state.card){root.innerHTML=`<div class="app-shell"><main class="customer-layout"><section class="panel"><h1>بطاقتك في ضيافة القهوة الملكية</h1><p>افتح رابط بطاقتك مباشرة من رسالة واتساب التي وصلتك. لا تحتاج نسخ الرابط أو تسجيل دخول.</p><p class="fineprint">إذا لم تُفتح البطاقة، اطلب من إدارة القهوة الملكية إرسال رابطك الخاص مجددًا.</p></section></main></div>`;return;}
  const c=state.card;
  root.innerHTML=`<div class="app-shell"><main class="customer-layout bank-customer"><div class="customer-topline">القهوة الملكية <span>بطاقتك في ضيافتنا</span></div>${customerCard(c)}${!isStandalone()?`<section class="install-focus"><strong>ثبّت بطاقتك على جوالك</strong><p>عشان تفتحها بسهولة وتتابع نقاطك.</p><button class="btn gold wide" data-action="install-now">تثبيت البطاقة</button></section>`:''}${notificationsPrompt(c)}<div class="simple-footer"><span>إجمالي المناسبات: ${num(c.total_events)}</span><button data-action="refresh-card" class="btn ghost small">تحديث النقاط ↻</button></div></main></div>`;
  maybeInstallPrompt();maybePromptPush();
@@ -81,8 +92,10 @@ function customerManageModal(c){state.currentCustomer=c;const d=state.data||{},e
  modal(`بطاقة ${c.name}`,`<div class="status-line"><span class="mono">${escapeHtml(c.member_code)}</span><strong>${num(progressState(c.progress,d.settings?.reward_threshold||6,c.available_rewards).progress)} / ${num(d.settings?.reward_threshold||6)}</strong></div><p>إجمالي مناسباته: ${num(c.total_events)} · هداياه المتاحة: ${num(c.available_rewards)}</p><form id="add-stamp-form"><div class="form-grid"><div class="field"><label>كم مناسبة تضيف؟</label><select name="count">${[1,2,3,4,5,6].map(i=>`<option value="${i}">${num(i)}</option>`).join('')}</select></div><div class="field"><label>تاريخ المناسبة</label><input name="occurred_on" type="date" value="${today()}" required></div></div><div class="field"><label>اسم المناسبة</label><input name="title" value="مناسبة ضيافة" required maxlength="150"></div><button class="btn wide" type="submit">اعتماد النقاط</button></form><hr><p class="fineprint">لإعادة إرسال QR نحتاج إصدار رابط جديد؛ هذا يُبطل الرابط القديم على جهاز العميل.</p><button class="btn secondary wide" data-action="rotate-link" data-id="${escapeHtml(c.id)}">إصدار QR جديد</button><h3>آخر المناسبات</h3>${events.slice(0,12).map(e=>`<div class="history-item"><div><strong>${escapeHtml(e.title)}</strong><small>${date(e.occurred_on)} · ${e.status==='approved'?'معتمدة':'ملغاة'}</small></div>${e.status==='approved'?`<button class="btn danger small" data-action="reverse-event" data-id="${escapeHtml(e.id)}">إلغاء</button>`:''}</div>`).join('')||empty('لم تُسجل مناسبات بعد')}${rewards.filter(r=>r.status==='available').map(r=>`<div class="reward-banner"><strong>🎁 ${escapeHtml(r.description)}</strong><button class="btn small" data-action="redeem" data-id="${escapeHtml(r.id)}">استبدال</button></div>`).join('')}`,`<button class="btn danger" data-action="delete-customer" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}">حذف العميل</button><button class="btn secondary" data-action="close-modal">إغلاق</button>`);}
 function cardUrl(token){return `${location.origin}/card#card=${token}`;}
 function linkModal(token,customer){const url=cardUrl(token);let qr='';try{qr=membershipQrSvg(url);}catch(e){qr=`<p class="fineprint">تعذر عرض QR. يمكنك مشاركة رابط البطاقة مباشرة.</p>`;}
- const waLink=whatsappShareUrl({name:customer.name,cardLink:url,contact:customer.contact,rewardThreshold:state.data?.settings?.reward_threshold||6});
- modal(`بطاقة ${customer.name} جاهزة 🎉`,`<p>أرسل للعميل بطاقة الولاء برسالة ترحيبية جاهزة، فيها رابط بطاقته وطريقة فتحها وتثبيتها.</p><div class="qr-display">${qr}<span>بطاقة خاصة باسم ${escapeHtml(customer.name)}</span></div><code class="secret-link">${escapeHtml(url)}</code><p class="fineprint">${customer.contact?'يفتح زر واتساب محادثة الرقم المسجل إن كان صالحًا.':'لم يُسجَّل رقم جوال؛ يمكنك اختيار العميل داخل واتساب.'} الرابط خاص بالعميل، لا تشاركه علنًا.</p>`,`<a class="btn whatsapp wide" href="${escapeHtml(waLink)}" target="_blank" rel="noopener noreferrer">💬 مشاركة واتساب</a><button class="btn secondary" data-action="copy-link" data-link="${escapeHtml(url)}">نسخ الرابط</button><button class="btn secondary" data-action="download-qr" data-link="${escapeHtml(url)}">حفظ QR</button><button class="btn secondary" data-action="close-modal">إغلاق</button>`);}
+ const threshold=state.data?.settings?.reward_threshold||6;
+ const message=cardWelcomeMessage(customer.name,url,threshold);
+ const waLink=whatsappShareUrl({name:customer.name,cardLink:url,contact:customer.contact,rewardThreshold:threshold});
+ modal(`بطاقة ${customer.name} جاهزة`,`<p>أرسل بطاقة الولاء مباشرة عبر واتساب. الرابط في الرسالة قابل للضغط ويفتح بطاقة العميل دون تسجيل دخول.</p><details class="wa-preview"><summary>عرض نص رسالة واتساب قبل الإرسال</summary><pre dir="auto">${escapeHtml(message)}</pre></details><div class="qr-display">${qr}<span>بطاقة خاصة باسم ${escapeHtml(customer.name)}</span></div><code class="secret-link">${escapeHtml(url)}</code><p class="fineprint">${customer.contact?'يفتح زر واتساب محادثة الرقم المسجل إن كان صالحًا.':'يمكنك اختيار العميل داخل واتساب.'} رابط البطاقة خاص، فلا تشاركه علنًا.</p>`,`<a class="btn whatsapp wide" href="${escapeHtml(waLink)}" target="_blank" rel="noopener noreferrer">مشاركة عبر واتساب</a><button class="btn secondary" data-action="copy-link" data-link="${escapeHtml(url)}">نسخ الرابط</button><button class="btn secondary" data-action="download-qr" data-link="${escapeHtml(url)}">حفظ QR</button><button class="btn secondary" data-action="close-modal">إغلاق</button>`);}
 function installHowTo(){modal('تثبيت البطاقة على الهاتف',`<p>${isIOS()?'على iPhone: افتح Safari واضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية».':'على Android: اضغط «تثبيت البطاقة» وسيظهر لك طلب التثبيت مباشرة إذا كان المتصفح يدعمه.'}</p>`,`<button class="btn" data-action="close-modal">تمام</button>`);}
 function maybeInstallPrompt(){if(isStandalone()||!state.card)return;const key=`royal-card-install-nudge:${state.cardToken||state.card?.member_code||''}`;if(sessionStorage.getItem(key)||document.querySelector('#modal-overlay'))return;sessionStorage.setItem(key,'1');modal('ثبّت بطاقتك على هاتفك',`<p>عشان ما تضيع بطاقتك وتقدر تتابع نقاطك وهديتك في أي وقت.</p>`,`<button class="btn gold" data-action="install-now">تثبيت البطاقة</button>`);}
 function maybePromptPush(){
@@ -131,11 +144,6 @@ async function onSubmit(event){const form=event.target;if(!form?.id)return;event
   }
   if(form.id==='settings-form'){
    await rpc('admin_update_settings',{p_name:String(values.get('name')).trim(),p_reward_threshold:Number(values.get('reward_threshold')),p_reward_description:String(values.get('reward_description')).trim(),p_weekly_weekday:Number(state.data?.settings?.weekly_weekday??4),p_weekly_time:String(state.data?.settings?.weekly_time||'17:00')});await loadAdmin();toast('تم حفظ الإعدادات.');
-  }
-  if(form.id==='open-link-form'){
-   const raw=String(values.get('link')).trim();let url;try{url=new URL(raw);}catch{throw Error('الصق رابط البطاقة كاملًا.');}
-   const token=new URLSearchParams(url.hash.slice(1)).get('card');if(url.origin!==location.origin||!token||!/^[a-f0-9]{64}$/.test(token))throw Error('هذا ليس رابط بطاقة صالحًا لهذا الموقع.');
-   state.cardToken=token;saveCardToken(token);history.replaceState({},'',`/card#card=${token}`);await loadCard();
   }
  }catch(error){showError(error);}finally{state.busy=false;if(button?.isConnected)button.disabled=false;}
 }

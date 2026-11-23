@@ -12,29 +12,22 @@ export function normalizeWhatsAppPhone(value) {
   return /^[1-9]\d{7,14}$/.test(digits) ? digits : '';
 }
 
-// WhatsApp pre-filled message intentionally contains no emoji/symbol sequences:
-// some mobile clients convert non-BMP pictographs to question marks.
+// Keep the prefilled WhatsApp text concise and entirely emoji-free.
+// WhatsApp auto-detects the full HTTPS address placed on a dedicated line.
 export function cardWelcomeMessage(name, cardLink, rewardThreshold = 6) {
-  const customer = String(name ?? '').replace(/\p{Extended_Pictographic}|[\uFE0E\uFE0F\u200D]/gu, '').trim() || 'عميلنا العزيز';
+  const customer = String(name ?? '')
+    .replace(/[\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Modifier}\uFE0E\uFE0F\u200D\u20E3]/gu, '')
+    .replace(/\s+/g, ' ').trim() || 'عميلنا العزيز';
   const threshold = Number.isInteger(Number(rewardThreshold)) && Number(rewardThreshold) > 0
     ? Number(rewardThreshold) : 6;
   return `السلام عليكم يا ${customer}
+بطاقة الولاء الخاصة بك في القهوة الملكية جاهزة.
 
-يسعدنا انضمامك إلى *بطاقة الولاء في ضيافة القهوة الملكية*.
-
-*بطاقتك جاهزة!*
-رابط بطاقتك الخاصة:
+اضغط الرابط لتفتح بطاقتك مباشرة:
 ${cardLink}
 
-*طريقة الدخول:*
-1. افتح الرابط، وستظهر بطاقتك باسمك ونقاطك مباشرة.
-2. عند إكمال ${threshold} مناسبات تستحق هديتك.
-3. اضغط على "تثبيت البطاقة" للاحتفاظ بها على جوالك.
-
-*لا تنسى تفعيل الإشعارات* بعد تثبيت البطاقة حتى يصلك كل جديد وتذكيرات ضيافتنا. وتقدر تتابع كل نقطة تنضاف لبطاقتك أولًا بأول من الرابط.
-
-*ما تحتاج تسوي حساب أو تكتب كلمة مرور.*
-نتشرف بخدمتك في مناسباتك.`;
+بعد ${threshold} مناسبات تستحق هديتك.
+لا تنس تثبيت البطاقة وتفعيل الإشعارات.`;
 }
 
 export function whatsappShareUrl({ name, cardLink, contact, rewardThreshold = 6 }) {

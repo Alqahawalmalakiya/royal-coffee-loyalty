@@ -1,5 +1,5 @@
-const CACHE = 'royal-loyalty-shell-v9';
-const SHELL = ['/', '/index.html', '/styles.css', '/app.js', '/api.js', '/qr.js', '/whatsapp.js', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png', '/assets/logo-mark.png'];
+const CACHE = 'royal-loyalty-shell-v11';
+const SHELL = ['/', '/index.html', '/styles.css', '/app.js', '/api.js', '/qr.js', '/whatsapp.js', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png', '/assets/logo-mark.png', '/assets/icon-maskable-192.png', '/assets/icon-maskable-512.png', '/assets/apple-touch-icon-180.png', '/assets/favicon-64.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });
