@@ -7,8 +7,21 @@ try{session=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(_){}
 export const config=CONFIG;
 export const configured=()=>Boolean(CONFIG.SUPABASE_URL?.startsWith('https://') && CONFIG.SUPABASE_PUBLISHABLE_KEY && CONFIG.CARD_API_URL?.startsWith('https://'));
 export const currentSession=()=>session;
-export const currentCardToken=()=>localStorage.getItem(CARD_KEY)||'';
-export const saveCardToken=(token)=>{if(token && /^[a-f0-9]{64}$/.test(token))localStorage.setItem(CARD_KEY,token);else localStorage.removeItem(CARD_KEY);};
+const validCardToken=(token)=>typeof token==='string' && /^[a-f0-9]{64}$/.test(token);
+const COOKIE_KEY='royal-coffee-card-token';
+const cookieToken=()=>{const match=document.cookie.split('; ').find(c=>c.startsWith(COOKIE_KEY+'='));const value=match?.slice(COOKIE_KEY.length+1)||'';return validCardToken(value)?value:'';};
+export const currentCardToken=()=>{let stored='';try{stored=localStorage.getItem(CARD_KEY)||'';}catch(_){}return validCardToken(stored)?stored:cookieToken();};
+export const saveCardToken=(token)=>{
+ if(validCardToken(token)){
+  try{localStorage.setItem(CARD_KEY,token);}catch(_){}
+  document.cookie=`${COOKIE_KEY}=${token}; Path=/; Max-Age=31536000; SameSite=Strict; Secure`;
+  window.royalCardInstall?.apply(token);
+ }else{
+  try{localStorage.removeItem(CARD_KEY);}catch(_){}
+  document.cookie=`${COOKIE_KEY}=; Path=/; Max-Age=0; SameSite=Strict; Secure`;
+  window.royalCardInstall?.forget();
+ }
+};
 const apiError=(body,status)=>{const error=new Error(body?.msg||body?.error_description||body?.message||body?.error||`HTTP ${status}`);error.status=status;return error;};
 async function parseJson(r){const body=await r.json().catch(()=>({}));if(!r.ok)throw apiError(body,r.status);return body;}
 async function authPost(path,data){return parseJson(await fetch(`${CONFIG.SUPABASE_URL}/auth/v1/${path}`,{method:'POST',headers:{'apikey':CONFIG.SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify(data)}));}

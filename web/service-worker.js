@@ -1,5 +1,5 @@
-const CACHE = 'royal-loyalty-shell-v11';
-const SHELL = ['/', '/index.html', '/styles.css', '/app.js', '/api.js', '/qr.js', '/whatsapp.js', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png', '/assets/logo-mark.png', '/assets/icon-maskable-192.png', '/assets/icon-maskable-512.png', '/assets/apple-touch-icon-180.png', '/assets/favicon-64.png'];
+const CACHE = 'royal-loyalty-shell-v12';
+const SHELL = ['/', '/index.html', '/styles.css', '/app.js', '/pwa-init.js', '/api.js', '/qr.js', '/whatsapp.js', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png', '/assets/logo-mark.png', '/assets/icon-maskable-192.png', '/assets/icon-maskable-512.png', '/assets/apple-touch-icon-180.png', '/assets/favicon-64.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });
@@ -11,7 +11,8 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === '/config.js') return; // never cache connection configuration persistently
+  if (url.pathname === '/config.js') return;
+  if (url.pathname.startsWith('/app-manifest/')) { event.respondWith(fetch(req, {cache:'no-store'})); return; } // private install manifest: never cache // never cache connection configuration persistently
   if (req.mode === 'navigate') {
     event.respondWith(fetch(req).catch(() => caches.match('/index.html')));
     return;
